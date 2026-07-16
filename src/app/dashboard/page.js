@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import LegalContent from "../LegalContent";
@@ -52,7 +52,7 @@ const MenuIcons = {
   ),
 };
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState(null);
@@ -880,7 +880,15 @@ export default function Dashboard() {
             )}
           </>
         )}
-      </div>
+     </div>
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
