@@ -1,0 +1,16 @@
+{
+  "name": "RoomLink",
+  "short_name": "RoomLink",
+  "description": "Find your next place to call home. Hostels and apartments near campus, reviewed by real students.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1E88E5",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
