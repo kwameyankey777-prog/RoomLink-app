@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Suspense } from "react";
 import { AuthProvider } from "../lib/AuthContext";
 import BottomNav from "./BottomNav";
 import GoogleTranslate from "./GoogleTranslate";
@@ -18,11 +19,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col pb-16">
+     <body className="min-h-full flex flex-col pb-16">
         <GoogleTranslate />
         <AuthProvider>
           {children}
-          <BottomNav />
+          <Suspense fallback={null}>
+            <BottomNav />
+          </Suspense>
         </AuthProvider>
       </body>
     </html>
