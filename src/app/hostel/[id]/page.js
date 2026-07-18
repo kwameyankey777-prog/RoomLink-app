@@ -100,6 +100,7 @@ export default function HostelDetail({ params }) {
   async function handleBookingSubmit(e) {
     e.preventDefault();
     if (!user) return;
+    if (hostel?.available === false) return;
     setBookingSubmitting(true);
     setBookingError(null);
     const { id } = await params;
@@ -137,6 +138,8 @@ export default function HostelDetail({ params }) {
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
+  const isUnavailable = hostel.available === false;
+
   return (
     <main className="min-h-screen bg-white">
       <header className="border-b border-gray-200 px-6 py-4">
@@ -151,6 +154,16 @@ export default function HostelDetail({ params }) {
         <h1 className="text-3xl font-bold text-gray-900 mb-1">{hostel.name}</h1>
         {avgRating && (
           <p className="text-sm text-gray-600 mb-6">★ {avgRating} · {reviews.length} review{reviews.length !== 1 ? "s" : ""}</p>
+        )}
+
+        {isUnavailable && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-8 flex items-center gap-3">
+            <span className="text-amber-500 text-lg">⚠</span>
+            <div>
+              <p className="text-amber-800 font-semibold text-sm">Currently unavailable</p>
+              <p className="text-amber-700 text-sm">This listing isn't accepting new bookings right now.</p>
+            </div>
+          </div>
         )}
 
         {hostel.images && hostel.images.length > 0 ? (
@@ -288,7 +301,12 @@ export default function HostelDetail({ params }) {
               </p>
               {avgRating && <p className="text-sm text-gray-500 mb-6">★ {avgRating} · {reviews.length} reviews</p>}
 
-              {profile?.role === "student" ? (
+              {isUnavailable ? (
+                <div className="text-center py-6">
+                  <p className="text-amber-700 font-semibold text-lg mb-2">Not available</p>
+                  <p className="text-gray-500 text-sm">This host has marked this listing as unavailable. Check back later.</p>
+                </div>
+              ) : profile?.role === "student" ? (
                 bookingSubmitted ? (
                   <div className="text-center py-6">
                     <p className="text-green-600 font-semibold text-lg mb-2">Request sent!</p>

@@ -18,7 +18,7 @@ export default function MapPage() {
         .eq("status", "approved")
         .not("lat", "is", null)
         .not("lng", "is", null);
-      setHostels(data || []);
+      setHostels((data || []).filter((h) => h.available !== false));
       setLoading(false);
     }
     loadHostels();
