@@ -31,14 +31,14 @@ export default function LegalContent() {
           <p className="text-xs text-gray-400">Last updated: July 19, 2026</p>
 
           <p>
-            HnAlink ("HnAlink," "we," "us," or "our") provides a platform connecting
-            students and other occupants ("Occupants") with hostel and apartment owners
-            ("Hosts") in Ghana. This Privacy Policy explains how we collect, use, store,
+            HnAlink (&quot;HnAlink,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) provides a platform connecting
+            students and other occupants (&quot;Occupants&quot;) with hostel and apartment owners
+            (&quot;Hosts&quot;) in Ghana. This Privacy Policy explains how we collect, use, store,
             and share information when you use our website and mobile application
-            (together, the "Platform").
+            (together, the &quot;Platform&quot;).
           </p>
           <p>
-            This Policy is intended to comply with Ghana's Data Protection Act, 2012
+            This Policy is intended to comply with Ghana&apos;s Data Protection Act, 2012
             (Act 843), and reflects our current practices as an early-stage service.
             HnAlink, a business currently operating from Agona Nkwanta, Ghana,
             is the data controller responsible for your information.
@@ -55,7 +55,7 @@ export default function LegalContent() {
           <p><strong>Messages:</strong> content of messages sent between Occupants and Hosts
             through our in-app messaging feature.</p>
           <p><strong>Profile photo:</strong> if you choose to upload one.</p>
-          <p><strong>Location data:</strong> if you grant permission, your device's
+          <p><strong>Location data:</strong> if you grant permission, your device&apos;s
             approximate or precise location, used only to show your position on the map
             feature.</p>
           <p><strong>Usage data:</strong> pages viewed, listings recently viewed (stored on
@@ -88,8 +88,8 @@ export default function LegalContent() {
           <ul className="list-disc pl-5 space-y-1">
             <li>
               <strong>Between Occupants and Hosts</strong> as necessary to facilitate a
-              booking or listing — for example, a Host's name and contact details are shown
-              to an Occupant who wishes to book, and an Occupant's name is shown to the Host
+              booking or listing — for example, a Host&apos;s name and contact details are shown
+              to an Occupant who wishes to book, and an Occupant&apos;s name is shown to the Host
               reviewing a request.
             </li>
             <li>
@@ -107,17 +107,17 @@ export default function LegalContent() {
 
           <h3 className="text-base font-bold text-gray-900 mt-6">5. Data Storage and Security</h3>
           <p>
-            Your data is stored using Supabase's infrastructure, with access restricted
+            Your data is stored using Supabase&apos;s infrastructure, with access restricted
             through row-level security policies designed so that users can generally only
             view or modify their own data, except where sharing is required for the
-            Platform's core functions (such as viewing listings or receiving booking
+            Platform&apos;s core functions (such as viewing listings or receiving booking
             requests). While we take reasonable steps to protect your information, no method
             of transmission or storage is completely secure, and we cannot guarantee absolute
             security.
           </p>
 
           <h3 className="text-base font-bold text-gray-900 mt-6">6. Your Rights</h3>
-          <p>Under Ghana's Data Protection Act, 2012 (Act 843), you have the right to:</p>
+          <p>Under Ghana&apos;s Data Protection Act, 2012 (Act 843), you have the right to:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Access the personal data we hold about you;</li>
             <li>Request correction of inaccurate or incomplete data;</li>
@@ -128,18 +128,18 @@ export default function LegalContent() {
           <p>
             To exercise any of these rights, contact us at{" "}
             <a href="mailto:HnAlink20@gmail.com" className="text-[#1E88E5]">HnAlink20@gmail.com</a>.
-            You may also lodge a complaint with Ghana's Data Protection Commission.
+            You may also lodge a complaint with Ghana&apos;s Data Protection Commission.
           </p>
 
           <h3 className="text-base font-bold text-gray-900 mt-6">7. Data Retention</h3>
           <p>
             We retain your information for as long as your account is active or as needed to
-            provide the Platform's services. If you delete your account, we will delete or
+            provide the Platform&apos;s services. If you delete your account, we will delete or
             anonymize your personal data within a reasonable period, except where retention
             is required to comply with legal obligations or resolve disputes.
           </p>
 
-          <h3 className="text-base font-bold text-gray-900 mt-6">8. Children's Privacy</h3>
+          <h3 className="text-base font-bold text-gray-900 mt-6">8. Children&apos;s Privacy</h3>
           <p>
             The Platform is intended for users who are at least 18 years old, or the age of
             majority in their jurisdiction. We do not knowingly collect personal information
@@ -149,7 +149,7 @@ export default function LegalContent() {
           <h3 className="text-base font-bold text-gray-900 mt-6">9. Changes to This Policy</h3>
           <p>
             We may update this Privacy Policy from time to time. Material changes will be
-            reflected by updating the "Last updated" date above.
+            reflected by updating the &quot;Last updated&quot; date above.
           </p>
 
           <h3 className="text-base font-bold text-gray-900 mt-6">10. Contact Us</h3>
@@ -163,8 +163,8 @@ export default function LegalContent() {
           <p className="text-xs text-gray-400">Last updated: July 19, 2026</p>
 
           <p>
-            These Terms of Service ("Terms") govern your access to and use of HnAlink (the
-            "Platform"), operated by HnAlink ("HnAlink," "we," "us," or "our"). By
+            These Terms of Service (&quot;Terms&quot;) govern your access to and use of HnAlink (the
+            &quot;Platform&quot;), operated by HnAlink (&quot;HnAlink,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). By
             creating an account or using the Platform, you agree to these Terms. If you do
             not agree, please do not use the Platform.
           </p>
@@ -229,7 +229,7 @@ export default function LegalContent() {
 
           <h3 className="text-base font-bold text-gray-900 mt-6">8. Disclaimer of Warranties</h3>
           <p>
-            The Platform is provided "as is" and "as available," without warranties of any
+            The Platform is provided &quot;as is&quot; and &quot;as available,&quot; without warranties of any
             kind, whether express or implied. HnAlink does not warrant that listings are
             accurate, that Hosts or Occupants will act lawfully or in good faith, or that the
             Platform will be uninterrupted or error-free.
