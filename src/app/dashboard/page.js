@@ -67,6 +67,8 @@ function DashboardContent() {
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
+  const [becomingHost, setBecomingHost] = useState(false);
+  const [showBecomeHostConfirm, setShowBecomeHostConfirm] = useState(false);
 
   const [bookings, setBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
@@ -81,6 +83,7 @@ function DashboardContent() {
   const [savingName, setSavingName] = useState(false);
   const [deletingListingId, setDeletingListingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [togglingAvailabilityId, setTogglingAvailabilityId] = useState(null);
   const [myReviews, setMyReviews] = useState([]);
   const [myReviewsLoading, setMyReviewsLoading] = useState(true);
 
@@ -169,6 +172,51 @@ function DashboardContent() {
     }
     loadBookings();
   }, [profile]);
+
+  async function handleBecomeHost() {
+    if (!profile || becomingHost) return;
+    setBecomingHost(true);
+    setMessage(null);
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ role: "owner" })
+      .eq("id", profile.id)
+      .select();
+
+    setBecomingHost(false);
+    setShowBecomeHostConfirm(false);
+
+    if (error || !data || data.length === 0) {
+      setMessage({ type: "error", text: error?.message || "Could not update your account. Please try again." });
+      return;
+    }
+
+    setProfile((prev) => ({ ...prev, role: "owner" }));
+    router.push("/add-hostel");
+  }
+
+  async function handleToggleAvailability(hostelId, currentlyAvailable) {
+    setTogglingAvailabilityId(hostelId);
+    setListingMessage(null);
+
+    const { data, error } = await supabase
+      .from("hostels")
+      .update({ available: !currentlyAvailable })
+      .eq("id", hostelId)
+      .select();
+
+    setTogglingAvailabilityId(null);
+
+    if (error || !data || data.length === 0) {
+      setListingMessage({ type: "error", text: error?.message || "Could not update availability." });
+      return;
+    }
+
+    setMyListings((prev) =>
+      prev.map((l) => (l.id === hostelId ? { ...l, available: !currentlyAvailable } : l))
+    );
+  }
 
   async function handleBookingAction(bookingId, newStatus) {
     setActionMessage(null);
@@ -508,6 +556,25 @@ function DashboardContent() {
               <span className="text-xs uppercase tracking-wider text-[#1E88E5] mt-1">{profile?.role === "owner" ? "Host" : "Occupant"}</span>
             </div>
 
+            {profile?.role === "student" && (
+              <button
+                onClick={() => setShowBecomeHostConfirm(true)}
+                className="w-full flex items-center justify-between bg-gradient-to-r from-[#1E88E5] to-[#1565C0] text-white rounded-xl p-4 mb-6 hover:opacity-90 transition-opacity"
+              >
+                <div className="text-left">
+                  <p className="font-semibold">Become a Host</p>
+                  <p className="text-xs text-white/80">List your hostel or apartment</p>
+                </div>
+                <span className="text-xl">→</span>
+              </button>
+            )}
+
+            {message && (
+              <p className={`text-sm mb-4 ${message.type === "error" ? "text-red-600" : "text-green-600"}`}>
+                {message.text}
+              </p>
+            )}
+
             <div className="space-y-3">
               {menuItems.map((item) => (
                 <button
@@ -635,116 +702,144 @@ function DashboardContent() {
                   <p className="text-gray-400 text-sm">You haven't listed any properties yet.</p>
                 ) : (
                   <div className="space-y-6">
-                    {myListings.map((listing) => (
-                      <div key={listing.id} className="border border-gray-200 rounded-xl p-5 bg-white">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            {editingListingId === listing.id ? (
-                              <div className="flex items-center gap-2 mb-1">
-                                <input
-                                  type="text"
-                                  value={editName}
-                                  onChange={(e) => setEditName(e.target.value)}
-                                  className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#1E88E5]"
-                                  autoFocus
-                                />
+                    {myListings.map((listing) => {
+                      const isAvailable = listing.available !== false;
+                      return (
+                        <div key={listing.id} className="border border-gray-200 rounded-xl p-5 bg-white">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              {editingListingId === listing.id ? (
+                                <div className="flex items-center gap-2 mb-1">
+                                  <input
+                                    type="text"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#1E88E5]"
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={() => handleSaveName(listing.id)}
+                                    disabled={savingName}
+                                    className="text-xs font-semibold text-white bg-[#1E88E5] px-3 py-1.5 rounded-lg hover:bg-[#1565C0] disabled:opacity-50"
+                                  >
+                                    {savingName ? "Saving..." : "Save"}
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingListingId(null)}
+                                    className="text-xs font-semibold text-gray-500 px-2"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="font-semibold text-gray-900">{listing.name}</p>
+                                  <button
+                                    onClick={() => startEditName(listing)}
+                                    className="text-gray-400 hover:text-[#1E88E5]"
+                                    aria-label="Edit name"
+                                  >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M12 20h9" />
+                                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              )}
+                              <p className="text-sm text-gray-500">{listing.town}</p>
+                            </div>
+                            <span className="text-xs font-semibold px-3 py-1 rounded-full capitalize bg-gray-100 text-gray-600 shrink-0">
+                              {listing.status}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 mb-4">
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {isAvailable ? "Available" : "Not available"}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {isAvailable ? "Visible to occupants as open" : "Hidden as fully booked"}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleToggleAvailability(listing.id, isAvailable)}
+                              disabled={togglingAvailabilityId === listing.id}
+                              className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${
+                                isAvailable ? "bg-green-500" : "bg-gray-300"
+                              } disabled:opacity-50`}
+                              aria-label="Toggle availability"
+                            >
+                              <span
+                                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                                  isAvailable ? "translate-x-6" : "translate-x-0"
+                                }`}
+                              />
+                            </button>
+                          </div>
+
+                          {listing.images && listing.images.length > 0 && (
+                            <div className="flex gap-2 overflow-x-auto mb-4">
+                              {listing.images.map((url) => (
+                                <div key={url} className="relative flex-shrink-0">
+                                  <img src={url} alt="" className="w-24 h-24 object-cover rounded-lg" />
+                                  <button
+                                    onClick={() => handleDeleteImage(listing.id, url)}
+                                    className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-red-700"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-3 mb-4">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={(e) => handleNewImageChange(listing.id, e)}
+                              className="text-sm"
+                            />
+                            <button
+                              onClick={() => handleAddImages(listing.id)}
+                              className="bg-[#1E88E5] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#1565C0] transition-colors"
+                            >
+                              Add Photos
+                            </button>
+                          </div>
+
+                          <div className="border-t border-gray-100 pt-4">
+                            {confirmDeleteId === listing.id ? (
+                              <div className="flex items-center gap-3">
+                                <p className="text-sm text-gray-700">Delete this listing permanently?</p>
                                 <button
-                                  onClick={() => handleSaveName(listing.id)}
-                                  disabled={savingName}
-                                  className="text-xs font-semibold text-white bg-[#1E88E5] px-3 py-1.5 rounded-lg hover:bg-[#1565C0] disabled:opacity-50"
+                                  onClick={() => handleDeleteListing(listing.id)}
+                                  disabled={deletingListingId === listing.id}
+                                  className="text-xs font-semibold text-white bg-red-600 px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50"
                                 >
-                                  {savingName ? "Saving..." : "Save"}
+                                  {deletingListingId === listing.id ? "Deleting..." : "Yes, delete"}
                                 </button>
                                 <button
-                                  onClick={() => setEditingListingId(null)}
+                                  onClick={() => setConfirmDeleteId(null)}
                                   className="text-xs font-semibold text-gray-500 px-2"
                                 >
                                   Cancel
                                 </button>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-2 mb-1">
-                                <p className="font-semibold text-gray-900">{listing.name}</p>
-                                <button
-                                  onClick={() => startEditName(listing)}
-                                  className="text-gray-400 hover:text-[#1E88E5]"
-                                  aria-label="Edit name"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 20h9" />
-                                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
-                                  </svg>
-                                </button>
-                              </div>
+                              <button
+                                onClick={() => setConfirmDeleteId(listing.id)}
+                                className="text-sm font-semibold text-red-600 hover:text-red-700"
+                              >
+                                Delete listing
+                              </button>
                             )}
-                            <p className="text-sm text-gray-500">{listing.town}</p>
                           </div>
-                          <span className="text-xs font-semibold px-3 py-1 rounded-full capitalize bg-gray-100 text-gray-600 shrink-0">
-                            {listing.status}
-                          </span>
                         </div>
-
-                        {listing.images && listing.images.length > 0 && (
-                          <div className="flex gap-2 overflow-x-auto mb-4">
-                            {listing.images.map((url) => (
-                              <div key={url} className="relative flex-shrink-0">
-                                <img src={url} alt="" className="w-24 h-24 object-cover rounded-lg" />
-                                <button
-                                  onClick={() => handleDeleteImage(listing.id, url)}
-                                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-red-700"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-3 mb-4">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={(e) => handleNewImageChange(listing.id, e)}
-                            className="text-sm"
-                          />
-                          <button
-                            onClick={() => handleAddImages(listing.id)}
-                            className="bg-[#1E88E5] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#1565C0] transition-colors"
-                          >
-                            Add Photos
-                          </button>
-                        </div>
-
-                        <div className="border-t border-gray-100 pt-4">
-                          {confirmDeleteId === listing.id ? (
-                            <div className="flex items-center gap-3">
-                              <p className="text-sm text-gray-700">Delete this listing permanently?</p>
-                              <button
-                                onClick={() => handleDeleteListing(listing.id)}
-                                disabled={deletingListingId === listing.id}
-                                className="text-xs font-semibold text-white bg-red-600 px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50"
-                              >
-                                {deletingListingId === listing.id ? "Deleting..." : "Yes, delete"}
-                              </button>
-                              <button
-                                onClick={() => setConfirmDeleteId(null)}
-                                className="text-xs font-semibold text-gray-500 px-2"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => setConfirmDeleteId(listing.id)}
-                              className="text-sm font-semibold text-red-600 hover:text-red-700"
-                            >
-                              Delete listing
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -881,6 +976,39 @@ function DashboardContent() {
           </>
         )}
      </div>
+
+      {showBecomeHostConfirm && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50"
+          onClick={() => !becomingHost && setShowBecomeHostConfirm(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Become a Host?</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Your account will switch to a Host account so you can list a hostel or apartment. You'll be taken straight to the listing form.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowBecomeHostConfirm(false)}
+                disabled={becomingHost}
+                className="flex-1 border border-gray-200 text-gray-600 font-semibold rounded-lg py-2.5 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBecomeHost}
+                disabled={becomingHost}
+                className="flex-1 bg-[#1E88E5] text-white font-semibold rounded-lg py-2.5 hover:bg-[#1565C0] transition-colors disabled:opacity-50"
+              >
+                {becomingHost ? "Switching..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
