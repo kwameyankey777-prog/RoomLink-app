@@ -28,10 +28,10 @@ export default function LegalContent() {
 
       {tab === "privacy" ? (
         <div className="prose prose-sm max-w-none text-gray-700 space-y-5">
-          <p className="text-xs text-gray-400">Last updated: [DATE]</p>
+          <p className="text-xs text-gray-400">Last updated: July 19, 2026</p>
 
           <p>
-            RoomLink ("RoomLink," "we," "us," or "our") provides a platform connecting
+            HnAlink ("HnAlink," "we," "us," or "our") provides a platform connecting
             students and other occupants ("Occupants") with hostel and apartment owners
             ("Hosts") in Ghana. This Privacy Policy explains how we collect, use, store,
             and share information when you use our website and mobile application
@@ -40,8 +40,8 @@ export default function LegalContent() {
           <p>
             This Policy is intended to comply with Ghana's Data Protection Act, 2012
             (Act 843), and reflects our current practices as an early-stage service.
-            [COMPANY NAME], a business currently operating from [ADDRESS / REGISTRATION
-            STATUS], is the data controller responsible for your information.
+            HnAlink, a business currently operating from Agona Nkwanta, Ghana,
+            is the data controller responsible for your information.
           </p>
 
           <h3 className="text-base font-bold text-gray-900 mt-6">1. Information We Collect</h3>
@@ -100,7 +100,7 @@ export default function LegalContent() {
             </li>
             <li>
               <strong>Legal obligations</strong> — we may disclose information if required by
-              law or to protect the rights, safety, or property of RoomLink, our users, or
+              law or to protect the rights, safety, or property of HnAlink, our users, or
               others.
             </li>
           </ul>
@@ -160,11 +160,11 @@ export default function LegalContent() {
         </div>
       ) : (
         <div className="prose prose-sm max-w-none text-gray-700 space-y-5">
-          <p className="text-xs text-gray-400">Last updated: [DATE]</p>
+          <p className="text-xs text-gray-400">Last updated: July 19, 2026</p>
 
           <p>
-            These Terms of Service ("Terms") govern your access to and use of RoomLink (the
-            "Platform"), operated by [COMPANY NAME] ("RoomLink," "we," "us," or "our"). By
+            These Terms of Service ("Terms") govern your access to and use of HnAlink (the
+            "Platform"), operated by HnAlink ("HnAlink," "we," "us," or "our"). By
             creating an account or using the Platform, you agree to these Terms. If you do
             not agree, please do not use the Platform.
           </p>
@@ -176,8 +176,8 @@ export default function LegalContent() {
 
           <h3 className="text-base font-bold text-gray-900 mt-6">2. Nature of the Platform</h3>
           <p>
-            RoomLink is a listing and communication platform that connects Occupants seeking
-            accommodation with Hosts offering hostel rooms or apartments. RoomLink is not a
+            HnAlink is a listing and communication platform that connects Occupants seeking
+            accommodation with Hosts offering hostel rooms or apartments. HnAlink is not a
             party to any rental agreement, lease, or booking arrangement made between an
             Occupant and a Host. We do not own, manage, or inspect any listed property, and
             we do not guarantee the accuracy of any listing, the conduct of any user, or the
@@ -195,18 +195,18 @@ export default function LegalContent() {
           <p>
             Hosts are solely responsible for the accuracy of their listings, including price,
             description, photographs, capacity, and location. Listings are subject to review
-            and approval before appearing publicly, and RoomLink reserves the right to
+            and approval before appearing publicly, and HnAlink reserves the right to
             reject, suspend, or remove any listing at its discretion, including for
             suspected inaccuracy, policy violations, or inappropriate content.
           </p>
 
           <h3 className="text-base font-bold text-gray-900 mt-6">5. Bookings (Occupants)</h3>
           <p>
-            A booking request submitted through the Platform is a request only. RoomLink does
+            A booking request submitted through the Platform is a request only. HnAlink does
             not guarantee that any booking request will be accepted, and does not process
             payments on behalf of Hosts or Occupants at this time. Any payment, deposit, or
             financial arrangement is made directly between the Occupant and Host, outside of
-            the Platform, and at their own risk. RoomLink is not responsible for any
+            the Platform, and at their own risk. HnAlink is not responsible for any
             financial loss, fraud, or dispute arising from arrangements made off-platform.
           </p>
 
@@ -214,7 +214,7 @@ export default function LegalContent() {
           <p>
             Occupants who have used the messaging or booking features may leave reviews.
             Reviews must be honest, based on genuine experience, and must not contain
-            defamatory, abusive, or unlawful content. RoomLink reserves the right to remove
+            defamatory, abusive, or unlawful content. HnAlink reserves the right to remove
             any review that violates these Terms.
           </p>
 
@@ -230,14 +230,14 @@ export default function LegalContent() {
           <h3 className="text-base font-bold text-gray-900 mt-6">8. Disclaimer of Warranties</h3>
           <p>
             The Platform is provided "as is" and "as available," without warranties of any
-            kind, whether express or implied. RoomLink does not warrant that listings are
+            kind, whether express or implied. HnAlink does not warrant that listings are
             accurate, that Hosts or Occupants will act lawfully or in good faith, or that the
             Platform will be uninterrupted or error-free.
           </p>
 
           <h3 className="text-base font-bold text-gray-900 mt-6">9. Limitation of Liability</h3>
           <p>
-            To the fullest extent permitted by the laws of Ghana, RoomLink shall not be
+            To the fullest extent permitted by the laws of Ghana, HnAlink shall not be
             liable for any indirect, incidental, special, or consequential damages, or for
             any loss of income, profit, or data, arising from your use of the Platform,
             any booking, any listing, or any interaction between users, whether such
