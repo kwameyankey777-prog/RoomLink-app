@@ -60,7 +60,7 @@ export default function ResetPassword() {
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-6">
       <div className="w-full max-w-md">
-        <Link href="/" className="text-[#1E88E5] font-bold text-xl block mb-8">RoomLink</Link>
+        <Link href="/" className="text-[#1E88E5] font-bold text-xl block mb-8">HnAlink</Link>
 
         {!validSession ? (
           <div>

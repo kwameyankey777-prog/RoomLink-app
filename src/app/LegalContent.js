@@ -127,7 +127,7 @@ export default function LegalContent() {
           </ul>
           <p>
             To exercise any of these rights, contact us at{" "}
-            <a href="mailto:RoomLink20@gmail.com" className="text-[#1E88E5]">RoomLink20@gmail.com</a>.
+            <a href="mailto:HnAlink20@gmail.com" className="text-[#1E88E5]">HnAlink20@gmail.com</a>.
             You may also lodge a complaint with Ghana's Data Protection Commission.
           </p>
 
@@ -155,7 +155,7 @@ export default function LegalContent() {
           <h3 className="text-base font-bold text-gray-900 mt-6">10. Contact Us</h3>
           <p>
             If you have questions about this Privacy Policy, contact us at{" "}
-            <a href="mailto:RoomLink20@gmail.com" className="text-[#1E88E5]">RoomLink20@gmail.com</a>.
+            <a href="mailto:HnAlink20@gmail.com" className="text-[#1E88E5]">HnAlink20@gmail.com</a>.
           </p>
         </div>
       ) : (
@@ -267,7 +267,7 @@ export default function LegalContent() {
           <h3 className="text-base font-bold text-gray-900 mt-6">13. Contact Us</h3>
           <p>
             Questions about these Terms can be directed to{" "}
-            <a href="mailto:RoomLink20@gmail.com" className="text-[#1E88E5]">RoomLink20@gmail.com</a>.
+            <a href="mailto:HnAlink20@gmail.com" className="text-[#1E88E5]">HnAlink20@gmail.com</a>.
           </p>
         </div>
       )}

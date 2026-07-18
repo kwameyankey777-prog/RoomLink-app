@@ -38,7 +38,7 @@ export default function StudentSignup() {
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-6">
       <div className="w-full max-w-md">
-        <Link href="/" className="text-[#1E88E5] font-bold text-xl block mb-8">RoomLink</Link>
+        <Link href="/" className="text-[#1E88E5] font-bold text-xl block mb-8">HnAlink</Link>
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Create your occupant account</h1>
         <p className="text-gray-500 mb-8">Sign up to send booking requests to hosts.</p>
         <form onSubmit={handleSubmit} className="space-y-4">

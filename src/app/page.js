@@ -6,7 +6,7 @@ import Link from "next/link";
 import HostelGrid from "./HostelGrid";
 
 export const metadata = {
-  title: "RoomLink | Find. Connect. Stay ",
+  title: "HnAlink | Find. Connect. Stay ",
   description: "Hostels and apartments near campus, reviewed by occupants.",
 };
 export const dynamic = "force-dynamic";
@@ -26,8 +26,8 @@ export default async function Home() {
    <main className="min-h-screen pb-20 bg-white text-gray-900">
       <header className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="RoomLink" className="h-9 w-9 rounded-lg" />
-          <span className="text-[#1E88E5] font-bold text-xl tracking-tight">RoomLink</span>
+          <img src="/logo.png" alt="HnAlink" className="h-9 w-9 rounded-lg" />
+        <span className="text-[#1E88E5] font-bold text-xl tracking-tight">HnAlink</span>
         </Link>
         <NavAuth />
       </header>

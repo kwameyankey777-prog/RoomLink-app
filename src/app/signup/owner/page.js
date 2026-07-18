@@ -37,7 +37,7 @@ export default function OwnerSignup() {
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-6">
       <div className="w-full max-w-md">
-        <Link href="/" className="text-[#1E88E5] font-bold text-xl block mb-8">RoomLink</Link>
+       <Link href="/" className="text-[#1E88E5] font-bold text-xl block mb-8">HnAlink</Link>
         <h1 className="text-2xl font-bold text-gray-900 mb-1">List your property</h1>
         <p className="text-gray-500 mb-8">Create a host account to list hostels and receive booking requests.</p>
         <form onSubmit={handleSubmit} className="space-y-4">

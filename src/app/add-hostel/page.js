@@ -133,8 +133,8 @@ const LocationPicker = dynamic(() => import("./LocationPicker"), { ssr: false })
   return (
     <main className="min-h-screen bg-white text-gray-900">
       <header className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-[#1E88E5] font-bold text-xl tracking-tight">
-          RoomLink
+       <Link href="/" className="text-[#1E88E5] font-bold text-xl tracking-tight">
+          HnAlink
         </Link>
       </header>
 

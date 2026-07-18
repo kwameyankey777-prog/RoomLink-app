@@ -141,8 +141,8 @@ export default function HostelDetail({ params }) {
     <main className="min-h-screen bg-white">
       <header className="border-b border-gray-200 px-6 py-4">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="RoomLink" className="h-9 w-9 rounded-lg" />
-          <span className="text-[#1E88E5] font-bold text-xl">roomlink</span>
+          <img src="/logo.png" alt="HnAlink" className="h-9 w-9 rounded-lg" />
+          <span className="text-[#1E88E5] font-bold text-xl">HnAlink</span>
         </Link>
       </header>
 

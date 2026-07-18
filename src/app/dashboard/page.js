@@ -866,8 +866,8 @@ function DashboardContent() {
                 <p className="text-gray-500 mb-4">
                   Need assistance? Reach out to our support team and we'll get back to you as soon as possible.
                 </p>
-               <p className="text-sm text-gray-700">
-                  Email: <a href="mailto:RoomLink20@gmail.com" className="text-[#1E88E5]">RoomLink20@gmail.com</a>
+              <p className="text-sm text-gray-700">
+                  Email: <a href="mailto:HnAlink20@gmail.com" className="text-[#1E88E5]">HnAlink20@gmail.com</a>
                 </p>
               </div>
             )}

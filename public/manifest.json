@@ -1,6 +1,6 @@
 {
-  "name": "RoomLink",
-  "short_name": "RoomLink",
+  "name": "HnAlink",
+  "short_name": "HnAlink",
   "description": "Find your next place to call home. Hostels and apartments near campus, reviewed by real students.",
   "start_url": "/",
   "display": "standalone",
