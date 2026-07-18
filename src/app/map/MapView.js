@@ -52,13 +52,17 @@ function RecenterButton({ location }) {
 export default function MapView({ hostels }) {
   const [userLocation, setUserLocation] = useState(null);
   const [hasCentered, setHasCentered] = useState(false);
+  const [locationNotice, setLocationNotice] = useState(null);
 
   const defaultCenter = hostels.length > 0
     ? [hostels[0].lat, hostels[0].lng]
     : [5.6037, -0.1870]; // fallback: Accra, Ghana
 
   useEffect(() => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setLocationNotice("Your browser doesn't support location. Showing all listings.");
+      return;
+    }
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
@@ -67,9 +71,16 @@ export default function MapView({ hostels }) {
           lng: pos.coords.longitude,
           accuracy: pos.coords.accuracy,
         });
+        setLocationNotice(null);
       },
       (err) => {
-        console.error("Geolocation error:", err.message);
+        if (err.code === err.PERMISSION_DENIED) {
+          setLocationNotice("Location access denied. Showing all listings.");
+        } else if (err.code === err.TIMEOUT) {
+          setLocationNotice("Couldn't get your location in time. Showing all listings.");
+        } else {
+          setLocationNotice("Couldn't get your location. Showing all listings.");
+        }
       },
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
     );
@@ -113,6 +124,19 @@ export default function MapView({ hostels }) {
           100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
         }
       `}</style>
+
+      {locationNotice && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white shadow-md rounded-full px-4 py-2 flex items-center gap-2 text-sm text-gray-700">
+          <span>{locationNotice}</span>
+          <button
+            onClick={() => setLocationNotice(null)}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <MapContainer center={defaultCenter} zoom={12} className="h-full w-full">
         <TileLayer
