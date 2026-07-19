@@ -149,7 +149,7 @@ export default function HostelDetail({ params }) {
         </Link>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-6 py-10 pb-28">
         <p className="text-gray-500 text-sm uppercase tracking-wider mb-2">{hostel.type}</p>
         <h1 className="text-3xl font-bold text-gray-900 mb-1">{hostel.name}</h1>
         {avgRating && (

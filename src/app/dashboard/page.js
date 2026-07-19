@@ -69,6 +69,7 @@ function DashboardContent() {
   const [message, setMessage] = useState(null);
   const [becomingHost, setBecomingHost] = useState(false);
   const [showBecomeHostConfirm, setShowBecomeHostConfirm] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const [bookings, setBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
@@ -521,7 +522,7 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto px-6 py-10">
+      <div className="max-w-md mx-auto px-6 pt-10 pb-32">
         {view === "profile" ? (
           <>
             <div className="flex flex-col items-center text-center mb-8">
@@ -593,8 +594,8 @@ function DashboardContent() {
             </div>
 
             <button
-              onClick={handleSignOut}
-              className="w-full mt-6 mb-24 bg-[#1E88E5] text-white font-semibold rounded-xl py-3 hover:bg-[#1565C0] transition-colors"
+              onClick={() => setShowLogoutConfirm(true)}
+              className="w-full mt-6 bg-[#1E88E5] text-white font-semibold rounded-xl py-3 hover:bg-[#1565C0] transition-colors"
             >
               Log Out
             </button>
@@ -976,6 +977,37 @@ function DashboardContent() {
           </>
         )}
      </div>
+
+      {showLogoutConfirm && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50"
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Log out?</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              You&apos;ll need to log back in to access your bookings and messages.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 border border-gray-200 text-gray-600 font-semibold rounded-lg py-2.5 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="flex-1 bg-red-600 text-white font-semibold rounded-lg py-2.5 hover:bg-red-700 transition-colors"
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showBecomeHostConfirm && (
         <div

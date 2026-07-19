@@ -11,7 +11,7 @@ export async function POST(request) {
     if (type === "new_request") {
       subject = `New booking request for ${hostelName}`;
       html = `
-        <p>You have a new booking request on RoomLink.</p>
+        <p>You have a new booking request on HnAlink.</p>
         <p><strong>Hostel:</strong> ${hostelName}</p>
         <p><strong>Room type:</strong> ${roomType}</p>
         ${message ? `<p><strong>Message:</strong> ${message}</p>` : ""}
@@ -29,14 +29,14 @@ export async function POST(request) {
       html = `
         <p>Hi ${studentName || "there"},</p>
         <p>Unfortunately, your booking request for <strong>${hostelName}</strong> was declined by the owner.</p>
-        <p>Feel free to browse other listings on RoomLink.</p>
+        <p>Feel free to browse other listings on HnAlink.</p>
       `;
     } else {
       return Response.json({ error: "Invalid email type" }, { status: 400 });
     }
 
     const { data, error } = await resend.emails.send({
-      from: "RoomLink <onboarding@resend.dev>",
+      from: "HnAlink <onboarding@resend.dev>",
       to,
       subject,
       html,
