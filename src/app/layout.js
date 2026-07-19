@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Suspense } from "react";
 import { AuthProvider } from "../lib/AuthContext";
+import AuthGate from "./AuthGate";
 import BottomNav from "./BottomNav";
 import GoogleTranslate from "./GoogleTranslate";
 
@@ -22,7 +23,9 @@ export default function RootLayout({ children }) {
      <body className="min-h-full flex flex-col pb-16">
         <GoogleTranslate />
         <AuthProvider>
-          {children}
+          <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>}>
+            <AuthGate>{children}</AuthGate>
+          </Suspense>
           <Suspense fallback={null}>
             <BottomNav />
           </Suspense>

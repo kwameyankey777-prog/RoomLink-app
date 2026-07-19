@@ -96,7 +96,7 @@ export default function BottomNav() {
     return () => window.removeEventListener("roomlink:messages-read", handleRead);
   }, [userId]);
 
-  const hiddenRoutes = ["/login/student", "/login/owner", "/signup/student", "/signup/owner"];
+  const hiddenRoutes = ["/welcome", "/login/student", "/login/owner", "/signup/student", "/signup/owner"];
   if (hiddenRoutes.includes(pathname)) {
     return null;
   }
