@@ -1,7 +1,118 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+
+const SWIPE_THRESHOLD = 40;
+
+function HostelCard({ hostel, avgRating, isGuestFavourite }) {
+  const router = useRouter();
+  const [imageIndex, setImageIndex] = useState(0);
+  const touchStartX = useRef(null);
+  const didSwipe = useRef(false);
+
+  const images = hostel.images || [];
+
+  function handleTouchStart(e) {
+    touchStartX.current = e.touches[0].clientX;
+    didSwipe.current = false;
+  }
+
+  function handleTouchMove(e) {
+    if (touchStartX.current === null) return;
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+    if (Math.abs(deltaX) > 10) {
+      didSwipe.current = true;
+    }
+  }
+
+  function handleTouchEnd(e) {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+
+    if (Math.abs(deltaX) > SWIPE_THRESHOLD && images.length > 1) {
+      if (deltaX < 0) {
+        setImageIndex((prev) => (prev + 1) % images.length);
+      } else {
+        setImageIndex((prev) => (prev - 1 + images.length) % images.length);
+      }
+    }
+    touchStartX.current = null;
+  }
+
+  function handleCardClick(e) {
+    if (didSwipe.current) {
+      e.preventDefault();
+      didSwipe.current = false;
+      return;
+    }
+    router.push(`/hostel/${hostel.id}`);
+  }
+
+  return (
+    <div onClick={handleCardClick} className="group block cursor-pointer">
+      <div
+        className="relative rounded-2xl overflow-hidden mb-3"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {images.length > 0 ? (
+          <img
+            src={images[imageIndex]}
+            alt={hostel.name}
+            className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300 select-none"
+            draggable={false}
+          />
+        ) : (
+          <div className="w-full aspect-square bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+            No photo yet
+          </div>
+        )}
+
+        {isGuestFavourite && (
+          <span className="absolute top-3 left-3 bg-white text-gray-900 text-xs font-semibold px-3 py-1.5 rounded-full shadow">
+            Guest favourite
+          </span>
+        )}
+
+        {images.length > 1 && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, i) => (
+              <span
+                key={i}
+                className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                  i === imageIndex ? "bg-white" : "bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-start justify-between gap-2">
+        <p className="font-semibold text-gray-900 text-[15px] leading-tight">{hostel.name}</p>
+        {avgRating && (
+          <span className="flex items-center gap-1 text-[15px] text-gray-900 shrink-0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#1E88E5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" /></svg>
+            {avgRating.toFixed(1)}
+          </span>
+        )}
+      </div>
+      <p className="text-gray-500 text-sm">{hostel.town}</p>
+      {hostel.capacity && (
+        <p className="text-gray-500 text-sm">
+          {hostel.type === "apartment"
+            ? `${hostel.capacity} bedroom${hostel.capacity > 1 ? "s" : ""}`
+            : `${hostel.capacity} per room`}
+        </p>
+      )}
+      <p className="text-gray-900 text-sm mt-1">
+        <span className="font-semibold">GHC{hostel.price}</span> / month
+      </p>
+    </div>
+  );
+}
 
 export default function HostelGrid({ hostels, reviews }) {
   const [capacityFilter, setCapacityFilter] = useState("");
@@ -103,48 +214,12 @@ export default function HostelGrid({ hostels, reviews }) {
           const isGuestFavourite = avgRating && avgRating >= 4.8 && hostelReviews.length >= 3;
 
           return (
-            <Link key={hostel.id} href={`/hostel/${hostel.id}`} className="group block">
-              <div className="relative rounded-2xl overflow-hidden mb-3">
-                {hostel.images && hostel.images.length > 0 ? (
-                  <img
-                    src={hostel.images[0]}
-                    alt={hostel.name}
-                    className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full aspect-square bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
-                    No photo yet
-                  </div>
-                )}
-
-                {isGuestFavourite && (
-                  <span className="absolute top-3 left-3 bg-white text-gray-900 text-xs font-semibold px-3 py-1.5 rounded-full shadow">
-                    Guest favourite
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-start justify-between gap-2">
-                <p className="font-semibold text-gray-900 text-[15px] leading-tight">{hostel.name}</p>
-                {avgRating && (
-                  <span className="flex items-center gap-1 text-[15px] text-gray-900 shrink-0">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#1E88E5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" /></svg>
-                    {avgRating.toFixed(1)}
-                  </span>
-                )}
-              </div>
-              <p className="text-gray-500 text-sm">{hostel.town}</p>
-              {hostel.capacity && (
-                <p className="text-gray-500 text-sm">
-                  {hostel.type === "apartment"
-                    ? `${hostel.capacity} bedroom${hostel.capacity > 1 ? "s" : ""}`
-                    : `${hostel.capacity} per room`}
-                </p>
-              )}
-              <p className="text-gray-900 text-sm mt-1">
-                <span className="font-semibold">GHC{hostel.price}</span> / month
-              </p>
-            </Link>
+            <HostelCard
+              key={hostel.id}
+              hostel={hostel}
+              avgRating={avgRating}
+              isGuestFavourite={isGuestFavourite}
+            />
           );
         })}
       </div>

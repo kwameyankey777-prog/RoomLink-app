@@ -7,6 +7,54 @@ import LegalContent from "../LegalContent";
 
 const ADMIN_EMAIL = "bartholomewkwameyankey@gmail.com";
 
+function compressImage(file, maxDimension = 1600, quality = 0.75) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      img.onload = () => {
+        let { width, height } = img;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
+              type: "image/jpeg",
+            });
+            resolve(compressedFile);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 const MenuIcons = {
   language: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E88E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -80,7 +128,6 @@ function DashboardContent() {
 
   const [myListings, setMyListings] = useState([]);
   const [myListingsLoading, setMyListingsLoading] = useState(true);
-  const [newImageFiles, setNewImageFiles] = useState({});
   const [listingMessage, setListingMessage] = useState(null);
   const [editingListingId, setEditingListingId] = useState(null);
   const [editName, setEditName] = useState("");
@@ -88,6 +135,7 @@ function DashboardContent() {
   const [deletingListingId, setDeletingListingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [togglingAvailabilityId, setTogglingAvailabilityId] = useState(null);
+  const [uploadingImagesId, setUploadingImagesId] = useState(null);
   const [myReviews, setMyReviews] = useState([]);
   const [myReviewsLoading, setMyReviewsLoading] = useState(true);
 
@@ -262,13 +310,9 @@ function DashboardContent() {
     }
   }
 
-  function handleNewImageChange(hostelId, e) {
-    setNewImageFiles((prev) => ({ ...prev, [hostelId]: Array.from(e.target.files) }));
-  }
-
-  async function handleAddImages(hostelId) {
-    const files = newImageFiles[hostelId];
-    if (!files || files.length === 0) return;
+  async function handleImageSelect(hostelId, e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     const listing = myListings.find((l) => l.id === hostelId);
     const currentCount = (listing.images || []).length;
@@ -278,47 +322,51 @@ function DashboardContent() {
         type: "error",
         text: `This listing already has ${currentCount} photo(s). You can add up to ${7 - currentCount} more (max 7 total).`,
       });
+      e.target.value = "";
       return;
     }
 
     setListingMessage(null);
+    setUploadingImagesId(hostelId);
+
     const { data: { user } } = await supabase.auth.getUser();
-    const uploadedUrls = [];
 
-    for (const file of files) {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+    try {
+      const compressedFiles = await Promise.all(files.map((file) => compressImage(file)));
 
-      const { error: uploadError } = await supabase.storage
-        .from("hostel-images")
-        .upload(fileName, file);
+      const uploadResults = await Promise.all(
+        compressedFiles.map(async (file) => {
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${user.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage
+            .from("hostel-images")
+            .upload(fileName, file);
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabase.storage.from("hostel-images").getPublicUrl(fileName);
+          return urlData.publicUrl;
+        })
+      );
 
-      if (uploadError) {
-        setListingMessage({ type: "error", text: uploadError.message });
-        return;
-      }
+      const listing = myListings.find((l) => l.id === hostelId);
+      const updatedImages = [...(listing.images || []), ...uploadResults];
 
-      const { data: urlData } = supabase.storage.from("hostel-images").getPublicUrl(fileName);
-      uploadedUrls.push(urlData.publicUrl);
+      const { error } = await supabase
+        .from("hostels")
+        .update({ images: updatedImages })
+        .eq("id", hostelId);
+
+      if (error) throw error;
+
+      setMyListings((prev) =>
+        prev.map((l) => (l.id === hostelId ? { ...l, images: updatedImages } : l))
+      );
+      setListingMessage({ type: "success", text: "Photos added." });
+    } catch (err) {
+      setListingMessage({ type: "error", text: err.message || "Upload failed." });
+    } finally {
+      setUploadingImagesId(null);
+      e.target.value = "";
     }
-
-    const updatedImages = [...(listing.images || []), ...uploadedUrls];
-
-    const { error } = await supabase
-      .from("hostels")
-      .update({ images: updatedImages })
-      .eq("id", hostelId);
-
-    if (error) {
-      setListingMessage({ type: "error", text: error.message });
-      return;
-    }
-
-    setMyListings((prev) =>
-      prev.map((l) => (l.id === hostelId ? { ...l, images: updatedImages } : l))
-    );
-    setNewImageFiles((prev) => ({ ...prev, [hostelId]: [] }));
-    setListingMessage({ type: "success", text: "Photos added." });
   }
 
   async function handleDeleteImage(hostelId, imageUrl) {
@@ -811,20 +859,31 @@ function DashboardContent() {
                             </div>
                           )}
 
-                          <div className="flex items-center gap-3 mb-4">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              onChange={(e) => handleNewImageChange(listing.id, e)}
-                              className="text-sm"
-                            />
-                            <button
-                              onClick={() => handleAddImages(listing.id)}
-                              className="bg-[#1E88E5] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#1565C0] transition-colors"
-                            >
-                              Add Photos
-                            </button>
+                          <div className="mb-4">
+                            <label className="inline-flex items-center gap-2 bg-[#1E88E5] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#1565C0] transition-colors cursor-pointer">
+                              {uploadingImagesId === listing.id ? (
+                                <>
+                                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  Uploading...
+                                </>
+                              ) : (
+                                <>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                  </svg>
+                                  Add Photos
+                                </>
+                              )}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={(e) => handleImageSelect(listing.id, e)}
+                                disabled={uploadingImagesId === listing.id}
+                                className="hidden"
+                              />
+                            </label>
                           </div>
 
                           <div className="border-t border-gray-100 pt-4">

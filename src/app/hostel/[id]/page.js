@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../lib/supabase";
 import { useAuth } from "../../../lib/AuthContext";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,7 @@ export default function HostelDetail({ params }) {
   const [bookingSubmitted, setBookingSubmitted] = useState(false);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const touchStartX = useRef(null);
 
   function nextImage() {
     setCurrentImageIndex((prev) => (prev + 1) % hostel.images.length);
@@ -32,6 +33,23 @@ export default function HostelDetail({ params }) {
 
   function prevImage() {
     setCurrentImageIndex((prev) => (prev - 1 + hostel.images.length) % hostel.images.length);
+  }
+
+  function handleImageTouchStart(e) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function handleImageTouchEnd(e) {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(deltaX) > 40) {
+      if (deltaX < 0) {
+        nextImage();
+      } else {
+        prevImage();
+      }
+    }
+    touchStartX.current = null;
   }
 
   useEffect(() => {
@@ -167,38 +185,28 @@ export default function HostelDetail({ params }) {
         )}
 
         {hostel.images && hostel.images.length > 0 ? (
-          <div className="relative rounded-2xl overflow-hidden h-96 mb-10 bg-gray-100 select-none">
+          <div
+            className="relative rounded-2xl overflow-hidden h-96 mb-10 bg-gray-100 select-none"
+            onTouchStart={handleImageTouchStart}
+            onTouchEnd={handleImageTouchEnd}
+          >
             <img
               src={hostel.images[currentImageIndex]}
               alt={hostel.name}
               className="w-full h-full object-cover"
+              draggable={false}
             />
             {hostel.images.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 rounded-full w-9 h-9 flex items-center justify-center shadow"
-                >
-                  ‹
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 rounded-full w-9 h-9 flex items-center justify-center shadow"
-                >
-                  ›
-                </button>
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {hostel.images.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentImageIndex(i)}
-                      className={`w-2 h-2 rounded-full ${
-                        i === currentImageIndex ? "bg-white" : "bg-white/50"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </>
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {hostel.images.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`w-2 h-2 rounded-full ${
+                      i === currentImageIndex ? "bg-white" : "bg-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
             )}
           </div>
         ) : (
