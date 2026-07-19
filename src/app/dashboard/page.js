@@ -4,6 +4,9 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import LegalContent from "../LegalContent";
+
+const ADMIN_EMAIL = "bartholomewkwameyankey@gmail.com";
+
 const MenuIcons = {
   language: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E88E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -556,6 +559,19 @@ function DashboardContent() {
               {memberSince && <p className="text-gray-500 text-sm">Member since {memberSince}</p>}
               <span className="text-xs uppercase tracking-wider text-[#1E88E5] mt-1">{profile?.role === "owner" ? "Host" : "Occupant"}</span>
             </div>
+
+            {email === ADMIN_EMAIL && (
+              <button
+                onClick={() => router.push("/admin")}
+                className="w-full flex items-center justify-between bg-gray-900 text-white rounded-xl p-4 mb-6 hover:bg-gray-800 transition-colors"
+              >
+                <div className="text-left">
+                  <p className="font-semibold">Admin — Review Listings</p>
+                  <p className="text-xs text-white/70">Approve or reject submissions</p>
+                </div>
+                <span className="text-xl">→</span>
+              </button>
+            )}
 
             {profile?.role === "student" && (
               <button
