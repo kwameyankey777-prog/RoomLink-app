@@ -6,7 +6,7 @@ import Link from "next/link";
 import HostelGrid from "./HostelGrid";
 export const metadata = {
   title: "HnAlink | Find. Connect. Stay ",
-  description: "Hostels and apartments near campus, reviewed by occupants.",
+  description: "Verified stays, real reviews, zero stress.",
 };
 export const dynamic = "force-dynamic";
 export default async function Home() {
@@ -34,7 +34,7 @@ export default async function Home() {
           to <span className="text-[#1E88E5]">call home</span>
         </h1>
         <p className="text-gray-500 max-w-md mx-auto mb-8 text-lg">
-          Hostels and apartments near campus, reviewed by occupants.
+          Verified stays, real reviews, zero stress.
         </p>
         <HeroCTA />
       </section>
