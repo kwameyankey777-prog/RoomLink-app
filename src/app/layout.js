@@ -4,6 +4,7 @@ import { AuthProvider } from "../lib/AuthContext";
 import AuthGate from "./AuthGate";
 import BottomNav from "./BottomNav";
 import GoogleTranslate from "./GoogleTranslate";
+import BrandedLoading from "./BrandedLoading";
 
 export const metadata = {
   title: "HnAlink",
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
      <body className="min-h-full flex flex-col pb-16">
         <GoogleTranslate />
         <AuthProvider>
-          <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>}>
+          <Suspense fallback={<BrandedLoading />}>
             <AuthGate>{children}</AuthGate>
           </Suspense>
           <Suspense fallback={null}>

@@ -27,6 +27,37 @@ export default function HostelDetail({ params }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const touchStartX = useRef(null);
 
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("Inaccurate listing");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
+  const [reportError, setReportError] = useState(null);
+
+  async function handleReportSubmit(e) {
+    e.preventDefault();
+    if (!user) return;
+    setReportSubmitting(true);
+    setReportError(null);
+    const { id } = await params;
+
+    const { error } = await supabase.from("reports").insert([{
+      hostel_id: id,
+      reporter_id: user.id,
+      reason: reportReason,
+      details: reportDetails.trim() || null,
+      status: "pending",
+    }]);
+
+    setReportSubmitting(false);
+    if (error) {
+      setReportError(error.message);
+    } else {
+      setReportSubmitted(true);
+      setReportDetails("");
+    }
+  }
+
   function nextImage() {
     setCurrentImageIndex((prev) => (prev + 1) % hostel.images.length);
   }
@@ -246,6 +277,19 @@ export default function HostelDetail({ params }) {
               </div>
             )}
 
+            {user && (
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="text-gray-400 text-sm hover:text-red-500 transition-colors mb-6 flex items-center gap-1.5"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                  <line x1="4" y1="22" x2="4" y2="15" />
+                </svg>
+                Report this listing
+              </button>
+            )}
+
             <div className="border-t border-gray-100 pt-8">
               <h2 className="text-xl font-bold text-gray-900 mb-6">
                 {reviews.length > 0 ? "★ " + avgRating + " · " + reviews.length + " reviews" : "No reviews yet"}
@@ -353,6 +397,88 @@ export default function HostelDetail({ params }) {
           </div>
         </div>
       </div>
+
+      {showReportModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50"
+          onClick={() => {
+            setShowReportModal(false);
+            setReportSubmitted(false);
+            setReportError(null);
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {reportSubmitted ? (
+              <div className="text-center py-4">
+                <p className="text-green-600 font-semibold text-lg mb-2">Report submitted</p>
+                <p className="text-gray-500 text-sm mb-6">Thanks for letting us know. We&apos;ll review this listing.</p>
+                <button
+                  onClick={() => {
+                    setShowReportModal(false);
+                    setReportSubmitted(false);
+                  }}
+                  className="w-full bg-[#1E88E5] text-white font-semibold rounded-lg py-2.5 hover:bg-[#1565C0] transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleReportSubmit}>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Report this listing</h3>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                  <select
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1E88E5]"
+                  >
+                    <option>Inaccurate listing</option>
+                    <option>Suspected scam or fraud</option>
+                    <option>Inappropriate photos</option>
+                    <option>Host unresponsive or abusive</option>
+                    <option>Duplicate listing</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Details (optional)</label>
+                  <textarea
+                    value={reportDetails}
+                    onChange={(e) => setReportDetails(e.target.value)}
+                    rows={3}
+                    placeholder="Tell us more..."
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1E88E5]"
+                  />
+                </div>
+
+                {reportError && <p className="text-red-500 text-sm mb-4">{reportError}</p>}
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowReportModal(false)}
+                    className="flex-1 border border-gray-200 text-gray-600 font-semibold rounded-lg py-2.5 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={reportSubmitting}
+                    className="flex-1 bg-red-600 text-white font-semibold rounded-lg py-2.5 hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {reportSubmitting ? "Submitting..." : "Submit Report"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
