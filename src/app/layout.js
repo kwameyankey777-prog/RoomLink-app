@@ -1,10 +1,10 @@
 import "./globals.css";
 import { Suspense } from "react";
 import { AuthProvider } from "../lib/AuthContext";
+import { ThemeProvider } from "../lib/ThemeContext";
 import AuthGate from "./AuthGate";
 import BottomNav from "./BottomNav";
 import GoogleTranslate from "./GoogleTranslate";
-import BrandedLoading from "./BrandedLoading";
 
 export const metadata = {
   title: "HnAlink",
@@ -23,14 +23,16 @@ export default function RootLayout({ children }) {
     <html lang="en" className="h-full">
      <body className="min-h-full flex flex-col pb-16">
         <GoogleTranslate />
-        <AuthProvider>
-          <Suspense fallback={<BrandedLoading />}>
-            <AuthGate>{children}</AuthGate>
-          </Suspense>
-          <Suspense fallback={null}>
-            <BottomNav />
-          </Suspense>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <Suspense fallback={null}>
+              <AuthGate>{children}</AuthGate>
+            </Suspense>
+            <Suspense fallback={null}>
+              <BottomNav />
+            </Suspense>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

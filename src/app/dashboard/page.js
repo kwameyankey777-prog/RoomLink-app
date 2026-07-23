@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+import { useTheme } from "../../lib/ThemeContext";
 import LegalContent from "../LegalContent";
 
 const ADMIN_EMAIL = "bartholomewkwameyankey@gmail.com";
@@ -107,11 +108,17 @@ const MenuIcons = {
       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
     </svg>
   ),
+  theme: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E88E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  ),
 };
 
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { theme, setTheme } = useTheme();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState(searchParams.get("tab") || "profile");
@@ -570,6 +577,7 @@ function DashboardContent() {
   const menuItems = [
     { id: "settings", title: "Account Settings", subtitle: "Name, phone, email, password" },
     { id: "language", title: "Language", subtitle: "Translate the app" },
+    { id: "theme", title: "Theme", subtitle: theme === "system" ? "Following system" : theme === "dark" ? "Dark" : "Light" },
     { id: "bookings", title: profile?.role === "owner" ? "Booking Requests" : "My Bookings", subtitle: "Track your reservations" },
     ...(profile?.role === "owner" ? [{ id: "listings", title: "My Listings", subtitle: "Manage your properties & photos" }] : []),
     ...(profile?.role === "student" ? [{ id: "reviews", title: "Reviews & Contributions", subtitle: `${myReviews.length} review${myReviews.length !== 1 ? "s" : ""} written` }] : []),
@@ -925,6 +933,40 @@ function DashboardContent() {
                     })}
                   </div>
                 )}
+              </div>
+            )}
+
+            {view === "theme" && (
+              <div>
+                <h1 className="text-2xl font-bold mb-2 dark:text-gray-100">Theme</h1>
+                <p className="text-gray-500 mb-6">Choose how HnAlink looks on this device.</p>
+                <div className="space-y-2">
+                  {[
+                    { id: "system", label: "System", subtitle: "Match your device settings" },
+                    { id: "light", label: "Light", subtitle: "Always use light mode" },
+                    { id: "dark", label: "Dark", subtitle: "Always use dark mode" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setTheme(opt.id)}
+                      className={`w-full flex items-center justify-between border rounded-xl px-4 py-3 text-left transition-colors ${
+                        theme === opt.id
+                          ? "border-[#1E88E5] bg-blue-50 dark:bg-blue-950"
+                          : "border-gray-200 hover:border-gray-300 dark:border-gray-700"
+                      }`}
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">{opt.label}</p>
+                        <p className="text-xs text-gray-500">{opt.subtitle}</p>
+                      </div>
+                      {theme === opt.id && (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E88E5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
