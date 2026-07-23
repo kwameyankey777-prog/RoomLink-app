@@ -101,6 +101,12 @@ const MenuIcons = {
       <line x1="9" y1="17" x2="15" y2="17" />
     </svg>
   ),
+  feedback: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E88E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20l9-9-9-9-9 9 9 9z" opacity="0" />
+      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+    </svg>
+  ),
 };
 
 function DashboardContent() {
@@ -568,6 +574,7 @@ function DashboardContent() {
     ...(profile?.role === "owner" ? [{ id: "listings", title: "My Listings", subtitle: "Manage your properties & photos" }] : []),
     ...(profile?.role === "student" ? [{ id: "reviews", title: "Reviews & Contributions", subtitle: `${myReviews.length} review${myReviews.length !== 1 ? "s" : ""} written` }] : []),
     { id: "help", title: "Help Center", subtitle: "Support, FAQs" },
+    { id: "feedback", title: "Send Feedback", subtitle: "Tell us what you think" },
     { id: "legal", title: "Privacy & Legal", subtitle: "Policies & terms" },
   ];
 
@@ -644,7 +651,7 @@ function DashboardContent() {
               {menuItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setView(item.id)}
+                  onClick={() => item.id === "feedback" ? router.push("/feedback") : setView(item.id)}
                   className="w-full flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-4 text-left hover:border-[#1E88E5] transition-colors"
                 >
                   <span className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 shrink-0">{MenuIcons[item.id]}</span>

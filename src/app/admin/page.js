@@ -19,6 +19,14 @@ export default function AdminPage() {
   const [confirmAction, setConfirmAction] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const [submittingAction, setSubmittingAction] = useState(false);
+  const [feedbackList, setFeedbackList] = useState([]);
+  const [feedbackUsers, setFeedbackUsers] = useState({});
+  const [feedbackLoading, setFeedbackLoading] = useState(true);
+  const [reportsList, setReportsList] = useState([]);
+  const [reportsUsers, setReportsUsers] = useState({});
+  const [reportsHostels, setReportsHostels] = useState({});
+  const [reportsLoading, setReportsLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState("listings");
 
   useEffect(() => {
     async function checkAccess() {
@@ -58,6 +66,69 @@ export default function AdminPage() {
     loadHostels();
   }, [checkingAuth]);
 
+  useEffect(() => {
+    async function loadFeedback() {
+      if (checkingAuth) return;
+      setFeedbackLoading(true);
+      const { data } = await supabase
+        .from("feedback")
+        .select("*")
+        .order("created_at", { ascending: false });
+      setFeedbackList(data || []);
+
+      const userIds = [...new Set((data || []).map((f) => f.user_id).filter(Boolean))];
+      if (userIds.length > 0) {
+        const { data: userData } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
+        const map = {};
+        (userData || []).forEach((u) => { map[u.id] = u; });
+        setFeedbackUsers(map);
+      }
+
+      setFeedbackLoading(false);
+    }
+    loadFeedback();
+  }, [checkingAuth]);
+
+  useEffect(() => {
+    async function loadReports() {
+      if (checkingAuth) return;
+      setReportsLoading(true);
+      const { data } = await supabase
+        .from("reports")
+        .select("*")
+        .order("created_at", { ascending: false });
+      setReportsList(data || []);
+
+      const reporterIds = [...new Set((data || []).map((r) => r.reporter_id).filter(Boolean))];
+      if (reporterIds.length > 0) {
+        const { data: userData } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", reporterIds);
+        const map = {};
+        (userData || []).forEach((u) => { map[u.id] = u; });
+        setReportsUsers(map);
+      }
+
+      const hostelIds = [...new Set((data || []).map((r) => r.hostel_id).filter(Boolean))];
+      if (hostelIds.length > 0) {
+        const { data: hostelData } = await supabase
+          .from("hostels")
+          .select("id, name, town")
+          .in("id", hostelIds);
+        const map = {};
+        (hostelData || []).forEach((h) => { map[h.id] = h; });
+        setReportsHostels(map);
+      }
+
+      setReportsLoading(false);
+    }
+    loadReports();
+  }, [checkingAuth]);
+
   async function handleAction(hostelId, newStatus, reason) {
     setSubmittingAction(true);
     setActionMessage(null);
@@ -86,6 +157,20 @@ export default function AdminPage() {
       prev.map((h) => (h.id === hostelId ? { ...h, status: newStatus, rejection_reason: updates.rejection_reason } : h))
     );
     setActionMessage({ type: "success", text: `Listing ${newStatus}.` });
+  }
+
+  async function handleReportStatus(reportId, newStatus) {
+    const { data, error } = await supabase
+      .from("reports")
+      .update({ status: newStatus })
+      .eq("id", reportId)
+      .select();
+
+    if (error || !data || data.length === 0) return;
+
+    setReportsList((prev) =>
+      prev.map((r) => (r.id === reportId ? { ...r, status: newStatus } : r))
+    );
   }
 
   if (checkingAuth || loading) {
@@ -210,9 +295,38 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10 pb-40">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Admin — Listing Review</h1>
-        <p className="text-gray-500 mb-6">Approve or reject hostel and apartment submissions.</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">Admin</h1>
+        <p className="text-gray-500 mb-6">Review listings and see user feedback.</p>
 
+        <div className="flex items-center gap-2 mb-6 bg-gray-100 rounded-full p-1 w-fit">
+          <button
+            onClick={() => setActiveSection("listings")}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+              activeSection === "listings" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+            }`}
+          >
+            Listings
+          </button>
+          <button
+            onClick={() => setActiveSection("feedback")}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+              activeSection === "feedback" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+            }`}
+          >
+            Feedback ({feedbackList.length})
+          </button>
+          <button
+            onClick={() => setActiveSection("reports")}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+              activeSection === "reports" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+            }`}
+          >
+            Reports ({reportsList.filter((r) => r.status === "pending").length})
+          </button>
+        </div>
+
+        {activeSection === "listings" && (
+          <>
         {actionMessage && (
           <p className={`text-sm mb-4 ${actionMessage.type === "error" ? "text-red-600" : "text-green-600"}`}>
             {actionMessage.text}
@@ -250,6 +364,95 @@ export default function AdminPage() {
             {visibleHostels.map((h) => <HostelCard key={h.id} hostel={h} />)}
           </div>
         )}
+          </>
+        )}
+
+        {activeSection === "feedback" && (
+          <div>
+            {feedbackLoading ? (
+              <p className="text-gray-400 text-sm">Loading feedback...</p>
+            ) : feedbackList.length === 0 ? (
+              <p className="text-gray-400 text-sm">No feedback submitted yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {feedbackList.map((fb) => {
+                  const fbUser = feedbackUsers[fb.user_id];
+                  return (
+                    <div key={fb.id} className="border border-gray-200 rounded-xl p-5 bg-white">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="font-semibold text-gray-900">{fbUser?.full_name || "Unknown user"}</p>
+                          <p className="text-xs text-gray-500">{fbUser?.email}</p>
+                        </div>
+                        <p className="text-[#1E88E5] text-sm shrink-0">{"★".repeat(fb.rating)}{"☆".repeat(5 - fb.rating)}</p>
+                      </div>
+                      {fb.message && <p className="text-sm text-gray-700 mt-2">{fb.message}</p>}
+                      <p className="text-xs text-gray-400 mt-3">
+                        {new Date(fb.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeSection === "reports" && (
+          <div>
+            {reportsLoading ? (
+              <p className="text-gray-400 text-sm">Loading reports...</p>
+            ) : reportsList.length === 0 ? (
+              <p className="text-gray-400 text-sm">No reports submitted yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {reportsList.map((report) => {
+                  const reporter = reportsUsers[report.reporter_id];
+                  const hostel = reportsHostels[report.hostel_id];
+                  return (
+                    <div key={report.id} className="border border-gray-200 rounded-xl p-5 bg-white">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="font-semibold text-gray-900">{hostel?.name || "Unknown listing"}</p>
+                          <p className="text-xs text-gray-500">{hostel?.town}</p>
+                        </div>
+                        <span className={`text-xs font-semibold px-3 py-1 rounded-full capitalize shrink-0 ${
+                          report.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {report.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-red-600 font-medium mt-2">{report.reason}</p>
+                      {report.details && <p className="text-sm text-gray-600 mt-1">{report.details}</p>}
+                      <p className="text-xs text-gray-400 mt-2">
+                        Reported by {reporter?.full_name || "Unknown user"} · {new Date(report.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+
+                      {report.status === "pending" && (
+                        <div className="flex gap-3 mt-4">
+                          <button
+                            onClick={() => handleReportStatus(report.id, "resolved")}
+                            className="bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            Mark Resolved
+                          </button>
+                          <button
+                            onClick={() => handleReportStatus(report.id, "dismissed")}
+                            className="text-gray-500 text-sm font-semibold px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="h-32" aria-hidden="true" />
       </div>
 
       {previewImage && (
