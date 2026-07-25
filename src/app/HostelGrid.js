@@ -182,13 +182,13 @@ export default function HostelGrid({ hostels, reviews }) {
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1 flex-wrap justify-center">
+        <div className="overflow-x-auto scrollbar-hide -mx-6 px-6">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#1c1f27] rounded-full p-1 w-fit mx-auto">
             {["", "1", "2", "3", "4", "5", "6"].map((val) => (
               <button
                 key={val || "any"}
                 onClick={() => setCapacityFilter(val)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   capacityFilter === val
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
