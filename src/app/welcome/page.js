@@ -74,7 +74,7 @@ export default function WelcomePage() {
           to <span className="text-[#1E88E5]">call home</span>
         </h1>
         <p className="text-gray-500 max-w-sm mb-10 text-lg relative z-10">
-          Hostels and apartments near campus, reviewed by occupants.
+          Verified stays, real reviews, zero stress.
         </p>
 
         <div className="w-full max-w-sm space-y-3 relative z-10">
