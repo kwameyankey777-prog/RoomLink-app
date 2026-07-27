@@ -118,7 +118,7 @@ export default function HostelDetail({ params }) {
       setHostel(hostelData);
       setReviews(reviewsWithAvatars);
       if (hostelData?.owner_id) {
-        const { data: ownerData } = await supabase.from("profiles").select("full_name, phone, email").eq("id", hostelData.owner_id).single();
+        const { data: ownerData } = await supabase.from("profiles").select("full_name, phone, email, avatar_url, bio, created_at").eq("id", hostelData.owner_id).single();
         setOwnerProfile(ownerData);
       }
       setLoading(false);
@@ -263,9 +263,33 @@ export default function HostelDetail({ params }) {
 
             {ownerProfile && (
               <div className="border-t border-gray-100 py-6">
-                <p className="font-semibold text-gray-900 mb-3">Contact Owner</p>
-                <p className="text-gray-700 font-medium">{ownerProfile.full_name}</p>
-                <p className="text-gray-500 mb-3">📞 {ownerProfile.phone}</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-14 h-14 rounded-full bg-[#1E88E5] text-white flex items-center justify-center text-xl font-semibold overflow-hidden shrink-0">
+                    {ownerProfile.avatar_url ? (
+                      <img src={ownerProfile.avatar_url} alt={ownerProfile.full_name} className="w-full h-full object-cover" />
+                    ) : (
+                      (ownerProfile.full_name || "?").charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-lg">Hosted by {ownerProfile.full_name}</p>
+                    {ownerProfile.created_at && (
+                      <p className="text-gray-500 text-sm">
+                        Hosting since {new Date(ownerProfile.created_at).getFullYear()}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {ownerProfile.bio && (
+                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">{ownerProfile.bio}</p>
+                )}
+
+                <div className="bg-gray-50 rounded-lg px-4 py-3 mb-4">
+                  <p className="text-xs font-semibold text-gray-500 mb-1">Contact</p>
+                  <p className="text-gray-700 text-sm">📞 {ownerProfile.phone}</p>
+                </div>
+
                 {user && profile?.role === "student" && hostel.owner_id && (
                   <Link
                     href={`/messages?to=${hostel.owner_id}&hostel=${hostel.id}`}

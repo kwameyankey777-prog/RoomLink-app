@@ -127,6 +127,8 @@ function DashboardContent() {
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
+  const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -164,6 +166,7 @@ function DashboardContent() {
         setProfile(data);
         setFullName(data.full_name || "");
         setPhone(data.phone || "");
+        setBio(data.bio || "");
         setAvatarUrl(data.avatar_url || null);
       }
       setEmail(user.email || "");
@@ -509,7 +512,7 @@ function DashboardContent() {
 
     const { error: profileError } = await supabase
       .from("profiles")
-      .update({ full_name: fullName, phone })
+      .update({ full_name: fullName, phone, bio })
       .eq("id", profile.id);
 
     const authUpdates = {};
@@ -587,7 +590,7 @@ function DashboardContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0f1115]">
       <div className="max-w-md mx-auto px-6 pt-10 pb-32">
         {view === "profile" ? (
           <>
@@ -618,7 +621,7 @@ function DashboardContent() {
                   />
                 </label>
               </div>
-              <p className="text-xl font-bold text-gray-900">{fullName || email}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{fullName || email}</p>
               {memberSince && <p className="text-gray-500 text-sm">Member since {memberSince}</p>}
               <span className="text-xs uppercase tracking-wider text-[#1E88E5] mt-1">{profile?.role === "owner" ? "Host" : "Occupant"}</span>
             </div>
@@ -660,11 +663,11 @@ function DashboardContent() {
                 <button
                   key={item.id}
                   onClick={() => item.id === "feedback" ? router.push("/feedback") : setView(item.id)}
-                  className="w-full flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-4 text-left hover:border-[#1E88E5] transition-colors"
+                  className="w-full flex items-center gap-4 bg-white dark:bg-[#1a1d24] border border-gray-200 dark:border-gray-800 rounded-xl p-4 text-left hover:border-[#1E88E5] transition-colors"
                 >
-                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 shrink-0">{MenuIcons[item.id]}</span>
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950 shrink-0">{MenuIcons[item.id]}</span>
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{item.title}</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">{item.title}</p>
                     <p className="text-sm text-gray-500">{item.subtitle}</p>
                   </div>
                   <span className="text-gray-300">›</span>
@@ -1011,6 +1014,20 @@ function DashboardContent() {
                       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[#1E88E5]"
                     />
                   </div>
+                  {profile?.role === "owner" && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">About you</label>
+                      <textarea
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        rows={4}
+                        placeholder="Tell occupants a bit about yourself as a host..."
+                        maxLength={400}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[#1E88E5] placeholder-gray-300"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">{bio.length}/400 · Shown on your listing pages</p>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input
