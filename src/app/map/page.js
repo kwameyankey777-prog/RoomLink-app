@@ -32,9 +32,5 @@ export default function MapPage() {
     );
   }
 
-  return (
-    <div style={{ height: "calc(100vh - 64px)" }}>
-      <MapView hostels={hostels} />
-    </div>
-  );
+  return <MapView hostels={hostels} />;
 }

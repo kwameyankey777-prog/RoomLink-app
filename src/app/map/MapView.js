@@ -21,6 +21,41 @@ const userIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
+function MapResizeFix({ center, zoom }) {
+  const map = useMap();
+  useEffect(() => {
+    const t1 = setTimeout(() => {
+      map.invalidateSize();
+      map.setView(center, zoom, { animate: false });
+    }, 150);
+    const t2 = setTimeout(() => map.invalidateSize(), 600);
+
+    function handleResize() {
+      map.invalidateSize();
+    }
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [map]);
+  return null;
+}
+
+function RouteLine({ coordinates }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!coordinates || coordinates.length === 0) return;
+    const polyline = L.polyline(coordinates, { color: "#1E88E5", weight: 4, opacity: 0.85 }).addTo(map);
+    map.fitBounds(polyline.getBounds(), { padding: [60, 60] });
+    return () => {
+      map.removeLayer(polyline);
+    };
+  }, [coordinates, map]);
+  return null;
+}
+
 function RecenterOnFirstFix({ location, hasCentered, setHasCentered }) {
   const map = useMap();
   useEffect(() => {
@@ -53,6 +88,10 @@ export default function MapView({ hostels }) {
   const [userLocation, setUserLocation] = useState(null);
   const [hasCentered, setHasCentered] = useState(false);
   const [locationNotice, setLocationNotice] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
+  const [routingHostel, setRoutingHostel] = useState(null);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routeError, setRouteError] = useState(null);
 
   const defaultCenter = hostels.length > 0
     ? [hostels[0].lat, hostels[0].lng]
@@ -88,8 +127,54 @@ export default function MapView({ hostels }) {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
+  async function getDirections(hostel, mode) {
+    if (!userLocation) {
+      setRouteError("We need your location to calculate directions. Please allow location access.");
+      return;
+    }
+    setRouteLoading(true);
+    setRouteError(null);
+    setRoutingHostel(hostel.id);
+
+    const profile = mode === "walking" ? "foot" : "driving";
+    const url = `https://router.project-osrm.org/route/v1/${profile}/${userLocation.lng},${userLocation.lat};${hostel.lng},${hostel.lat}?overview=full&geometries=geojson`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data.routes || data.routes.length === 0) {
+        throw new Error("No route found");
+      }
+
+      const route = data.routes[0];
+      const coordinates = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+      const minutes = Math.round(route.duration / 60);
+      const km = (route.distance / 1000).toFixed(1);
+
+      setRouteInfo({
+        hostelId: hostel.id,
+        hostelName: hostel.name,
+        mode,
+        minutes,
+        km,
+        coordinates,
+      });
+    } catch (err) {
+      setRouteError("Couldn't calculate a route right now. Please try again.");
+    } finally {
+      setRouteLoading(false);
+      setRoutingHostel(null);
+    }
+  }
+
+  function clearRoute() {
+    setRouteInfo(null);
+    setRouteError(null);
+  }
+
   return (
-    <div className="relative h-full w-full">
+    <div style={{ position: "fixed", top: 0, bottom: 64, left: 0, right: 0 }}>
       <style>{`
         .user-dot-outer {
           width: 20px;
@@ -138,7 +223,13 @@ export default function MapView({ hostels }) {
         </div>
       )}
 
-      <MapContainer center={defaultCenter} zoom={12} className="h-full w-full">
+      <MapContainer
+        center={defaultCenter}
+        zoom={12}
+        minZoom={3}
+        worldCopyJump={true}
+        style={{ height: "100%", width: "100%" }}
+      >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -154,6 +245,22 @@ export default function MapView({ hostels }) {
                 <Link href={`/hostel/${hostel.id}`} className="text-[#1E88E5] hover:underline text-xs">
                   View details →
                 </Link>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => getDirections(hostel, "walking")}
+                    disabled={routeLoading && routingHostel === hostel.id}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold py-1.5 rounded-md transition-colors disabled:opacity-50"
+                  >
+                    {routeLoading && routingHostel === hostel.id ? "..." : "🚶 Walk"}
+                  </button>
+                  <button
+                    onClick={() => getDirections(hostel, "driving")}
+                    disabled={routeLoading && routingHostel === hostel.id}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold py-1.5 rounded-md transition-colors disabled:opacity-50"
+                  >
+                    {routeLoading && routingHostel === hostel.id ? "..." : "🚗 Drive"}
+                  </button>
+                </div>
               </div>
             </Popup>
           </Marker>
@@ -178,7 +285,34 @@ export default function MapView({ hostels }) {
           setHasCentered={setHasCentered}
         />
         <RecenterButton location={userLocation} />
+        <MapResizeFix center={defaultCenter} zoom={12} />
+        {routeInfo && <RouteLine coordinates={routeInfo.coordinates} />}
       </MapContainer>
+
+      {routeError && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-[1000] bg-white shadow-md rounded-full px-4 py-2 flex items-center gap-2 text-sm text-red-600">
+          <span>{routeError}</span>
+          <button onClick={() => setRouteError(null)} className="text-gray-400 hover:text-gray-600" aria-label="Dismiss">✕</button>
+        </div>
+      )}
+
+      {routeInfo && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] bg-white shadow-lg rounded-2xl px-5 py-3 flex items-center gap-4">
+          <div>
+            <p className="font-semibold text-gray-900 text-sm">{routeInfo.hostelName}</p>
+            <p className="text-gray-500 text-xs">
+              {routeInfo.mode === "walking" ? "🚶" : "🚗"} {routeInfo.km} km · {routeInfo.minutes} min
+            </p>
+          </div>
+          <button
+            onClick={clearRoute}
+            className="text-gray-400 hover:text-gray-600 text-sm shrink-0"
+            aria-label="Clear route"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
