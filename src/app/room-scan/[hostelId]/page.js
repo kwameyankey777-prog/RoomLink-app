@@ -95,10 +95,6 @@ export default function RoomScanCapture() {
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
     } catch (err) {
       setPermissionError("Camera access was denied. Please allow camera access and try again.");
       setPermissionState("idle");
@@ -121,6 +117,13 @@ export default function RoomScanCapture() {
     window.addEventListener("deviceorientation", handleOrientation, true);
     setPermissionState("active");
   }
+
+  useEffect(() => {
+    if (permissionState !== "active") return;
+    if (!videoRef.current || !streamRef.current) return;
+    videoRef.current.srcObject = streamRef.current;
+    videoRef.current.play().catch(() => {});
+  }, [permissionState]);
 
   function stopCapture() {
     window.removeEventListener("deviceorientation", handleOrientation, true);
