@@ -128,7 +128,6 @@ function DashboardContent() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
-  const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
