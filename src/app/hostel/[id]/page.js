@@ -6,6 +6,15 @@ import { useAuth } from "../../../lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+function VerifiedBadge() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="#1E88E5" className="inline-block shrink-0" aria-label="Verified host">
+      <path d="M12 2l2.4 1.4 2.7-.4 1.3 2.4 2.4 1.3-.4 2.7L22 12l-1.4 2.4.4 2.7-2.4 1.3-1.3 2.4-2.7-.4L12 22l-2.4-1.4-2.7.4-1.3-2.4-2.4-1.3.4-2.7L2 12l1.4-2.4-.4-2.7 2.4-1.3 1.3-2.4 2.7.4z" />
+      <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function HostelDetail({ params }) {
   const router = useRouter();
   const { user, profile } = useAuth();
@@ -13,6 +22,7 @@ export default function HostelDetail({ params }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ownerProfile, setOwnerProfile] = useState(null);
+  const [ownerReviewCount, setOwnerReviewCount] = useState(0);
 
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
@@ -120,6 +130,21 @@ export default function HostelDetail({ params }) {
       if (hostelData?.owner_id) {
         const { data: ownerData } = await supabase.from("profiles").select("full_name, phone, email, avatar_url, bio, created_at").eq("id", hostelData.owner_id).single();
         setOwnerProfile(ownerData);
+
+        const { data: ownerHostels } = await supabase
+          .from("hostels")
+          .select("id")
+          .eq("owner_id", hostelData.owner_id);
+
+        const ownerHostelIds = (ownerHostels || []).map((h) => h.id);
+        if (ownerHostelIds.length > 0) {
+          const { count } = await supabase
+            .from("reviews")
+            .select("id", { count: "exact", head: true })
+            .in("hostel_id", ownerHostelIds)
+            .eq("status", "approved");
+          setOwnerReviewCount(count || 0);
+        }
       }
       setLoading(false);
     }
@@ -272,7 +297,10 @@ export default function HostelDetail({ params }) {
                     )}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-lg">Hosted by {ownerProfile.full_name}</p>
+                    <p className="font-semibold text-gray-900 text-lg flex items-center gap-1.5">
+                      Hosted by {ownerProfile.full_name}
+                      {ownerReviewCount > 5 && <VerifiedBadge />}
+                    </p>
                     {ownerProfile.created_at && (
                       <p className="text-gray-500 text-sm">
                         Hosting since {new Date(ownerProfile.created_at).getFullYear()}
@@ -390,6 +418,12 @@ export default function HostelDetail({ params }) {
                   </div>
                 ) : (
                   <form onSubmit={handleBookingSubmit} className="space-y-4">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 flex items-start gap-2">
+                      <span className="text-amber-500 shrink-0 mt-0.5">⚠</span>
+                      <p className="text-amber-800 text-xs leading-relaxed">
+                        Never pay any money before you&apos;ve seen the room in person. HnAlink does not process payments and cannot recover funds sent off-platform.
+                      </p>
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
                       <select name="room_type" value={bookingForm.room_type} onChange={handleBookingChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:border-[#1E88E5]">
@@ -404,6 +438,12 @@ export default function HostelDetail({ params }) {
                       <textarea name="message" value={bookingForm.message} onChange={handleBookingChange} rows={3} placeholder="Introduce yourself, mention move-in date..." className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:border-[#1E88E5] placeholder-gray-300" />
                     </div>
                     {bookingError && <p className="text-red-500 text-sm">{bookingError}</p>}
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 flex items-start gap-2">
+                      <span className="text-amber-500 shrink-0">⚠</span>
+                      <p className="text-amber-800 text-xs leading-relaxed">
+                        Never pay any money before you&apos;ve seen the room in person. HnAlink does not process payments and is not responsible for money sent off-platform.
+                      </p>
+                    </div>
                     <button type="submit" disabled={bookingSubmitting} className="w-full bg-[#1E88E5] text-white font-semibold rounded-xl py-4 hover:bg-[#1565c0] transition-colors disabled:opacity-50 text-lg">
                       {bookingSubmitting ? "Sending..." : "Reserve"}
                     </button>
