@@ -418,12 +418,6 @@ export default function HostelDetail({ params }) {
                   </div>
                 ) : (
                   <form onSubmit={handleBookingSubmit} className="space-y-4">
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 flex items-start gap-2">
-                      <span className="text-amber-500 shrink-0 mt-0.5">⚠</span>
-                      <p className="text-amber-800 text-xs leading-relaxed">
-                        Never pay any money before you&apos;ve seen the room in person. HnAlink does not process payments and cannot recover funds sent off-platform.
-                      </p>
-                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
                       <select name="room_type" value={bookingForm.room_type} onChange={handleBookingChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:border-[#1E88E5]">
