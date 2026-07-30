@@ -128,6 +128,7 @@ function DashboardContent() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
+  const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -901,16 +902,6 @@ function DashboardContent() {
                                 className="hidden"
                               />
                             </label>
-                            <button
-                              onClick={() => router.push(`/room-scan/${listing.id}`)}
-                              className="inline-flex items-center gap-2 bg-gray-900 text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors ml-2"
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z" />
-                              </svg>
-                              Scan a Room
-                            </button>
                           </div>
 
                           <div className="border-t border-gray-100 pt-4">

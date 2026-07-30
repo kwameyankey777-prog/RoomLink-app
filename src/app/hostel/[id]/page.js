@@ -5,7 +5,6 @@ import { supabase } from "../../../lib/supabase";
 import { useAuth } from "../../../lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import RoomPanoramaViewer from "../../RoomPanoramaViewer";
 
 export default function HostelDetail({ params }) {
   const router = useRouter();
@@ -14,7 +13,6 @@ export default function HostelDetail({ params }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ownerProfile, setOwnerProfile] = useState(null);
-  const [panoramas, setPanoramas] = useState([]);
 
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
@@ -119,13 +117,6 @@ export default function HostelDetail({ params }) {
 
       setHostel(hostelData);
       setReviews(reviewsWithAvatars);
-
-      const { data: panoramaData } = await supabase
-        .from("room_panoramas")
-        .select("*")
-        .eq("hostel_id", id)
-        .order("id", { ascending: true });
-      setPanoramas(panoramaData || []);
       if (hostelData?.owner_id) {
         const { data: ownerData } = await supabase.from("profiles").select("full_name, phone, email, avatar_url, bio, created_at").eq("id", hostelData.owner_id).single();
         setOwnerProfile(ownerData);
@@ -252,15 +243,6 @@ export default function HostelDetail({ params }) {
         ) : (
           <div className="bg-gray-100 rounded-2xl h-64 flex items-center justify-center text-gray-400 mb-10">
             No photo yet
-          </div>
-        )}
-
-        {panoramas.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-lg font-bold text-gray-900 mb-3">Look around</h2>
-            {panoramas.map((p) => (
-              <RoomPanoramaViewer key={p.id} panorama={p} />
-            ))}
           </div>
         )}
 
